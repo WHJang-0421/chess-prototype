@@ -15,21 +15,27 @@ class Pair(list):
         return (Pair(self[0]//number, self[1]/number), Pair(self[0]%number, self[1]%number))
     
 class PointPosition(Pair):
-    pass
+    @property
+    def x(self):
+        return self[0]
+    
+    @property
+    def y(self):
+        return self[1]
 
-class TilePosition:
-    # initializers and factory methods
-    def __init__(self, row, col):
-        self.row = row
-        self.col = col
-
+class TilePosition(Pair):
+    @property
+    def row(self):
+        return self[0]
+    
+    @property
+    def col(self):
+        return self[1]
+    
+    # factory methods
     @staticmethod
     def from_position(x, y):
         return TilePosition(y // config.TILE_SIZE[1], x // config.TILE_SIZE[0])
-
-    @staticmethod
-    def from_position(point):
-        return TilePosition.from_position(point.x, point.y)
     
     @staticmethod
     def from_string(position_str):

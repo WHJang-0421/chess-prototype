@@ -2,7 +2,6 @@ import pygame
 import chess
 
 import config
-import utils as utils
 from Board import Board
 from Positions import TilePosition, PointPosition
 
@@ -46,59 +45,61 @@ draw_piece(board, board_screen)
 ##### game logic
 running = True
 board_can_change = False
-promotion = None
-prev_rowcol = ()
+promotion_move = None
+moving_piece_start_position = ()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN and promotion:
-            x, y = pygame.mouse.get_pos()
-            row, col = utils.tile_row_col(x, y)
-            promote_to = 'qrbn'[col]
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_position = PointPosition(*pygame.mouse.get_pos())
+            selected_tile = TilePosition.from_position(*mouse_position)
 
-            move = chess.Move.from_uci(promotion + promote_to)
-            board.push(move)
-            print(board)
-            draw_piece(board, board_screen)
-            promotion = False
+            if promotion_move and selected_tile.col < 4:
+                print('1')
+                promote_to = 'qrbn'[selected_tile.col]
+                move = chess.Move.from_uci(promotion_move + promote_to)
+                board.push(move)
+                draw_piece(board, board_screen)
+                # update loop variables
+                board_can_change = False
+                promotion_move = None
+                moving_piece_start_position = ()
 
-        elif event.type == pygame.MOUSEBUTTONDOWN and not board_can_change:
-            x, y = pygame.mouse.get_pos()
-            row, col = utils.tile_row_col(x, y)
-            if board.as_list()[row][col] != '.':
-                click_pos_str = utils.position_str(row, col)
+            elif not board_can_change and board.as_list()[selected_tile.row][selected_tile.col] != '.':
+                print('2')
                 circles = []
                 for move in board.legal_moves:
-                    if str(move)[:2] == click_pos_str:
-                        circles.append(utils.position_str_to_rowcol(str(move)[2:]))
-
+                    if str(move)[:2] == str(selected_tile):
+                        circles.append(TilePosition.from_string(str(move)[2:]))
                 draw_piece(board, board_screen, circles)
-                prev_rowcol = (row, col)
-                board_can_change = True
-        elif event.type == pygame.MOUSEBUTTONDOWN and board_can_change:
-            x, y = pygame.mouse.get_pos()
-            row, col = utils.tile_row_col(x, y)
-            if (row == prev_rowcol[0] and col == prev_rowcol[1]):
-                break
-            move = chess.Move.from_uci(utils.position_str(*prev_rowcol) + utils.position_str(row, col))
-            if move in board.legal_moves:
-                board.push(move)
-                print(board)
-                draw_piece(board, board_screen)
-            elif chess.Move.from_uci(str(move) + 'r') in board.legal_moves:
-                # display screen to choose between promotion pieces
-                pygame.draw.rect(board_screen, (255,255,255), pygame.Rect(0, 0, 4*config.TILE_SIZE[1], config.TILE_SIZE[0]))
-                # queen, rook, bishop, knight
-                for i, c in enumerate('qrbn'):
-                    piece = pygame.image.load(config.piece_files[c]).convert_alpha()
-                    board_screen.blit(piece, (config.IMAGE_PAD[0] + utils.position(0, i)[0], config.IMAGE_PAD[1] + utils.position(0, i)[1]))
-                pygame.display.flip()
-                prev_rowcol = (row, col)
-                promotion = str(move)
-            board_can_change = False
-        elif event.type == pygame.MOUSEBUTTONUP:
-            print('end click')
+                # update loop variables
+                moving_piece_start_position = selected_tile
+                board_can_change = True if circles else False
+                promotion_move = None
+
+            elif board_can_change and selected_tile != moving_piece_start_position:
+                print('3')
+                move = chess.Move.from_uci(str(moving_piece_start_position) + str(selected_tile))
+                if move in board.legal_moves:
+                    board.push(move)
+                    draw_piece(board, board_screen)
+                    board_can_change = False
+                    moving_piece_start_position = ()
+                    promotion_move = ()
+                elif chess.Move.from_uci(str(move) + 'r') in board.legal_moves:
+                    # display screen to choose between promotion pieces
+                    pygame.draw.rect(board_screen, (255,255,255), pygame.Rect(0, 0, 4*config.TILE_SIZE[1], config.TILE_SIZE[0]))
+                    for i, c in enumerate('qrbn'):
+                        piece = pygame.image.load(config.piece_files[c]).convert_alpha()
+                        board_screen.blit(piece, TilePosition(0,i).top_left_point + PointPosition(*config.IMAGE_PAD))
+                    pygame.display.flip()
+                    board_can_change = False
+                    moving_piece_start_position = ()
+                    promotion_move = str(move)
+                else:
+                    board_can_change = True
+                
 
         # check if the game ended
         if board.outcome() is not None:
