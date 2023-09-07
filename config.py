@@ -23,3 +23,6 @@ piece_files = {
     'Q': '/home/morrranii/projects/2023/chess-ai/imgs/w_queen.png',
     'K': '/home/morrranii/projects/2023/chess-ai/imgs/w_king.png'
 }
+
+PLAYER_COLOR = 'white'
+COMPUTER_COLOR = 'white' if PLAYER_COLOR == 'black' else 'black'
