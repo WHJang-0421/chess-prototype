@@ -65,8 +65,8 @@ while running:
             mouse_position = PointPosition(*pygame.mouse.get_pos())
             selected_tile = TilePosition.from_position(*mouse_position)
 
-            if promotion_move and selected_tile.col < 4:
-                promote_to = 'qrbn'[selected_tile.col]
+            if promotion_move and config.BOARD_SIZE[1]/2 - 2*config.TILE_SIZE[1] <= mouse_position.x <=  config.BOARD_SIZE[1]/2 + 2*config.TILE_SIZE[1] and config.BOARD_SIZE[0]/2 - 0.5*config.TILE_SIZE[0] <= mouse_position.y <= config.BOARD_SIZE[0]/2 + 0.5*config.TILE_SIZE[0]:
+                promote_to = 'qrbn'[int((mouse_position.x - (config.BOARD_SIZE[1]/2 - 2*config.TILE_SIZE[1])) // (config.TILE_SIZE[1]))]
                 move = chess.Move.from_uci(promotion_move + promote_to)
                 board.push(move)
                 draw_piece(board, screen)
@@ -87,18 +87,20 @@ while running:
                     current_player = config.COMPUTER_COLOR
                 elif chess.Move.from_uci(str(move) + 'r') in board.legal_moves:
                     # display screen to choose between promotion pieces
-                    pygame.draw.rect(screen, (255,255,255), pygame.Rect(0, 0, 4*config.TILE_SIZE[1], config.TILE_SIZE[0]))
+                    pygame.draw.rect(screen, (255,255,255), pygame.Rect(config.BOARD_SIZE[1]/2 - 2*config.TILE_SIZE[1], config.BOARD_SIZE[0]/2 - 0.5*config.TILE_SIZE[0], 4*config.TILE_SIZE[1], config.TILE_SIZE[0]))
                     for i, c in enumerate('qrbn'):
                         piece = pygame.image.load(config.piece_files[c]).convert_alpha()
-                        screen.blit(piece, TilePosition(0,i).top_left_point + PointPosition(*config.IMAGE_PAD))
+                        screen.blit(piece, PointPosition(config.BOARD_SIZE[1]/2 + (i-2)*config.TILE_SIZE[1], config.BOARD_SIZE[0]/2 - 0.5*config.TILE_SIZE[0]) + PointPosition(*config.IMAGE_PAD))
                     pygame.display.flip()
                     board_can_change = True
                     moving_piece_start_position = ()
                     promotion_move = str(move)
+                    current_player = config.PLAYER_COLOR
                 else:
+                    current_player = config.PLAYER_COLOR
                     board_can_change = False
 
-            if board.as_list()[selected_tile.row][selected_tile.col] != '.':
+            if not board_can_change and board.as_list()[selected_tile.row][selected_tile.col] != '.' and current_player == config.PLAYER_COLOR:
                 circles = []
                 for move in board.legal_moves:
                     if str(move)[:2] == str(selected_tile):
@@ -108,6 +110,7 @@ while running:
                 moving_piece_start_position = selected_tile
                 board_can_change = True if circles else False
                 promotion_move = None
+                current_player = config.PLAYER_COLOR
                 
 
         # check if the game ended
