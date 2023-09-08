@@ -66,8 +66,9 @@ class AlphaBetaWithOpening(Player):
 
     def next_move(self, board: Board):
         with chess.polyglot.open_reader("data/Titans.bin") as reader:
-            entry = reader.get(board)
-            if entry is None:
-                return self.alphabeta.next_move(board)
-            else:
+            try:
+                entry = reader.weighted_choice(board)
                 return entry.move
+            except IndexError:
+                return self.alphabeta.next_move(board)
+                
