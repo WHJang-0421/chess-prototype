@@ -85,6 +85,7 @@ while running:
                     promotion_move = str(move)
                 else:
                     board_can_change = False
+                    draw_piece(board, screen)
 
             if not board_can_change and board.as_list()[selected_tile.row][selected_tile.col] != '.':
                 circles = []

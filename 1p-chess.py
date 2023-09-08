@@ -4,7 +4,7 @@ import chess
 import config
 from Board import Board
 from Positions import TilePosition, PointPosition
-from models.Players import GreedyPlayer
+from models.MinMax import MinMaxWithOpening
 
 pygame.init()
 pygame.display.set_caption('Chess')
@@ -44,7 +44,7 @@ def draw_piece(board, screen, circles=None):
 draw_piece(board, screen)
 
 ##### game logic
-computer_agent = GreedyPlayer()
+computer_agent = MinMaxWithOpening(3)
 current_player = 'white'
 running = True
 board_can_change = False
@@ -99,6 +99,7 @@ while running:
                 else:
                     current_player = config.PLAYER_COLOR
                     board_can_change = False
+                    draw_piece(board, screen)
 
             if not board_can_change and board.as_list()[selected_tile.row][selected_tile.col] != '.' and current_player == config.PLAYER_COLOR:
                 circles = []

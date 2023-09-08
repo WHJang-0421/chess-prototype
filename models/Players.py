@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 import chess
 
 from Board import Board
+from models.Heuristics import white_score_dict, score
 import config
 
 class Player(ABC):
@@ -21,20 +22,6 @@ class RandomPlayer(Player):
         
 class GreedyPlayer(Player):
     computer_color = config.COMPUTER_COLOR
-    white_score_dict = {
-    'r': -5,
-    'n': -3,
-    'b': -3, 
-    'q': -9,
-    'k': 0,
-    'p': -1,
-    'P': 1,
-    'R': 5,
-    'N': 3,
-    'B': 3, 
-    'Q': 9,
-    'K': 0
-    }
 
     def next_move(self, board):
         moves = list(board.legal_moves)
@@ -43,13 +30,6 @@ class GreedyPlayer(Player):
 
     def score(self, board: Board, move):
         board.push(move)
-        result = 0
-        for row in board.as_list():
-            for c in row:
-                if c != '.':
-                    result += self.white_score_dict[c]
+        result = score(board, self.computer_color)
         board.pop()
-        if self.computer_color == 'white':
-            return result
-        else:
-            return -result
+        return result
