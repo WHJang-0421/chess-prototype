@@ -16,7 +16,7 @@ screen = pygame.display.set_mode(config.BOARD_SIZE)
 board = Board()
 
 # a function that draws pieces and circles on the board
-def draw_piece(board, screen, circles=None):
+def draw_piece(board, screen, circles=None, highlights=None):
     # clear the screen
     screen.fill((0,0,0))
     # draw the tiles
@@ -37,6 +37,9 @@ def draw_piece(board, screen, circles=None):
         for row, col in circles:
             tile = TilePosition(row, col)
             pygame.draw.circle(screen, (100,100,100), list(reversed(tile.center_point)), 5, 0)
+    if highlights is not None:
+        for tile in highlights:
+            pygame.draw.rect(screen, config.COLOR_RGB["highlighted"], pygame.Rect(*tile.top_left_point, *config.TILE_SIZE))
     # update the window
     pygame.display.flip()
 
@@ -57,7 +60,9 @@ while running:
         elif board.turn == (chess.WHITE if config.COMPUTER_COLOR == 'white' else chess.BLACK) and board.outcome() is None:
             move = computer_agent.next_move(board)
             board.push(move)
-            draw_piece(board, screen)
+
+            to_highlight = TilePosition.from_string(str(move)[:2])
+            draw_piece(board, screen, highlights=[to_highlight])
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_position = PointPosition(*pygame.mouse.get_pos())

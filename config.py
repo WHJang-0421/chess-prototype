@@ -6,7 +6,8 @@ IMAGE_PAD = (10, 10)
 
 COLOR_RGB = {
     'white': (238, 238, 210),
-    'black': (118, 150, 86)
+    'black': (118, 150, 86),
+    'highlighted': (226, 81, 76)
 }
 
 piece_files = {
