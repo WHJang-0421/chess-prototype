@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import chess
 
 from Board import Board
-from models.Heuristics import white_score_dict, score
+from models.heuristics.Heuristics import white_score_dict, score
 import config
 
 class Player(ABC):

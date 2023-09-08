@@ -3,7 +3,7 @@ import chess.polyglot
 
 from models.Players import Player, white_score_dict
 from Board import Board
-from models.Heuristics import score
+from models.heuristics.Heuristics import score
 import config
 
 class Node:

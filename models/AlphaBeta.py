@@ -3,7 +3,7 @@ import chess.polyglot
 
 from models.Players import Player, white_score_dict
 from Board import Board
-from models.Heuristics import score, move_importance
+from models.heuristics.Heuristics import score, move_importance
 from models.MinMax import Node
 import config
 
@@ -12,8 +12,8 @@ class AlphaBeta(Player):
 
     def __init__(self, depth=5):
         self.total_depth = depth
-        self.alpha = -10000
-        self.beta = 10000
+        self.alpha = -1000000
+        self.beta = 1000000
 
     def next_move(self, board):
         root = Node(board, None, True)
@@ -38,10 +38,13 @@ class AlphaBeta(Player):
             for c in node.childs:
                 self.evaluate(c, depth-1)
                 if c.evaluation < self.alpha:
-                    node.evaluation = -10000
+                    node.evaluation = -1000000
                     pruned = True
                     break
             if not pruned:
+                if not node.childs:
+                    node.evaluation = score(node.board, self.computer_color)
+                    return
                 node.next_node = min(node.childs, key=lambda x: (x.evaluation, move_importance(node.board, x.prev_move)))
                 node.evaluation = node.next_node.evaluation
                 self.beta = max(node.evaluation, self.beta)
@@ -50,10 +53,13 @@ class AlphaBeta(Player):
             for c in node.childs:
                 self.evaluate(c, depth-1)
                 if c.evaluation > self.beta:
-                    node.evaluation = 10000
+                    node.evaluation = 1000000
                     pruned = True
                     break
             if not pruned:
+                if not node.childs:
+                    node.evaluation = score(node.board, self.computer_color)
+                    return
                 node.next_node = max(node.childs, key=lambda x: (x.evaluation, move_importance(node.board, x.prev_move)))
                 node.evaluation = node.next_node.evaluation
                 self.alpha = min(node.evaluation, self.alpha)
