@@ -7,9 +7,12 @@ from models.Heuristics import score
 import config
 
 class Node:
-    def __init__(self, board, prev_move):
+    def __init__(self, board: Board, prev_move, is_max: bool):
         self.board = board
         self.prev_move = prev_move
+        self.evaluation = None
+        self.is_max = is_max
+        self.next_node = None
         self.childs = []
 
 class MinMax(Player):
@@ -19,30 +22,30 @@ class MinMax(Player):
         self.total_depth = depth
 
     def next_move(self, board):
-        root = self.create_tree(board, self.total_depth, None)
-        return max(root.childs, key=lambda x: self.calculate_score(x, 'min')).prev_move
+        root = Node(board, None, True)
+        self.evaluate(root, self.total_depth)
+        return root.next_node.prev_move
 
-    def create_tree(self, board: Board, depth, prev_move) -> Node:
+    def evaluate(self, node: Node, depth) -> None:
+        if node.evaluation:
+            return
+        
         if depth == 0:
-            return None
-        
-        root = Node(board.copy(), prev_move)
-        for move in board.legal_moves:
-            board.push(move)
-            child = self.create_tree(board, depth-1, move)
-            if child is not None:
-                root.childs.append(child)
-            board.pop()
-        return root
+            node.evaluation = score(node.board, self.computer_color)
+            return
 
-    def calculate_score(self, node: Node, mode) -> int:
-        if not node.childs:
-            return score(node.board, self.computer_color)
-        if mode == 'max':
-            return max([self.calculate_score(child, 'min') for child in node.childs])
+        for move in node.board.legal_moves:
+            new_board = node.board.copy()
+            new_board.push(move)
+            node.childs.append(Node(new_board, move, not node.is_max))
+        for c in node.childs:
+            self.evaluate(c, depth-1)
+        if node.is_max:
+            node.next_node = max(node.childs, key=lambda x: x.evaluation)
         else:
-            return min([self.calculate_score(child, 'max') for child in node.childs])
-        
+            node.next_node = min(node.childs, key=lambda x: x.evaluation)
+        node.evaluation = node.next_node.evaluation
+
 class MinMaxWithOpening(Player):
     def __init__(self, depth):
         self.minmax = MinMax(depth)
