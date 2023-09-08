@@ -3,7 +3,7 @@ import chess.polyglot
 
 from models.Players import Player, white_score_dict
 from Board import Board
-from models.Heuristics import score
+from models.Heuristics import score, move_importance
 from models.MinMax import Node
 import config
 
@@ -28,7 +28,7 @@ class AlphaBeta(Player):
             node.evaluation = score(node.board, self.computer_color)
             return
 
-        for move in node.board.legal_moves:
+        for move in sorted(list(node.board.legal_moves), key=lambda x: move_importance(node.board, x), reverse=True):
             new_board = node.board.copy()
             new_board.push(move)
             node.childs.append(Node(new_board, move, not node.is_max))
@@ -42,7 +42,7 @@ class AlphaBeta(Player):
                     pruned = True
                     break
             if not pruned:
-                node.next_node = min(node.childs, key=lambda x: x.evaluation)
+                node.next_node = min(node.childs, key=lambda x: (x.evaluation, move_importance(node.board, x.prev_move)))
                 node.evaluation = node.next_node.evaluation
                 self.beta = max(node.evaluation, self.beta)
         else:
@@ -54,7 +54,7 @@ class AlphaBeta(Player):
                     pruned = True
                     break
             if not pruned:
-                node.next_node = max(node.childs, key=lambda x: x.evaluation)
+                node.next_node = max(node.childs, key=lambda x: (x.evaluation, move_importance(node.board, x.prev_move)))
                 node.evaluation = node.next_node.evaluation
                 self.alpha = min(node.evaluation, self.alpha)
 

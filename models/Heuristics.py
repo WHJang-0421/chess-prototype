@@ -35,3 +35,14 @@ def score(board: Board, color):
         return result
     else:
         return -result
+    
+def move_importance(board: Board, move: chess.Move) -> int:
+    if board.gives_check(move):
+        return 40
+    if board.is_capture(move):
+        return 30
+    
+    start_row = int(str(move)[1])
+    end_row = int(str(move)[3])
+    direction_priority = -1 if config.COMPUTER_COLOR == 'black' else 1
+    return direction_priority * (end_row - start_row)

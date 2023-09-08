@@ -44,7 +44,7 @@ def draw_piece(board, screen, circles=None):
 draw_piece(board, screen)
 
 ##### game logic
-computer_agent = AlphaBeta(3)
+computer_agent = AlphaBeta(4)
 current_player = 'white'
 running = True
 board_can_change = False
