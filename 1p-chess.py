@@ -45,7 +45,6 @@ draw_piece(board, screen)
 
 ##### game logic
 computer_agent = AlphaBetaWithOpening(3)
-current_player = 'white'
 running = True
 board_can_change = False
 promotion_move = None
@@ -55,11 +54,10 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-        elif current_player == config.COMPUTER_COLOR and board.outcome() is None:
+        elif board.turn == (chess.WHITE if config.COMPUTER_COLOR == 'white' else chess.BLACK) and board.outcome() is None:
             move = computer_agent.next_move(board)
             board.push(move)
             draw_piece(board, screen)
-            current_player = config.PLAYER_COLOR
 
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_position = PointPosition(*pygame.mouse.get_pos())
@@ -74,7 +72,6 @@ while running:
                 board_can_change = False
                 promotion_move = None
                 moving_piece_start_position = ()
-                current_player = config.COMPUTER_COLOR
 
             elif board_can_change and selected_tile != moving_piece_start_position:
                 move = chess.Move.from_uci(str(moving_piece_start_position) + str(selected_tile))
@@ -84,7 +81,6 @@ while running:
                     board_can_change = False
                     moving_piece_start_position = ()
                     promotion_move = ()
-                    current_player = config.COMPUTER_COLOR
                 elif chess.Move.from_uci(str(move) + 'r') in board.legal_moves:
                     # display screen to choose between promotion pieces
                     pygame.draw.rect(screen, (255,255,255), pygame.Rect(config.BOARD_SIZE[1]/2 - 2*config.TILE_SIZE[1], config.BOARD_SIZE[0]/2 - 0.5*config.TILE_SIZE[0], 4*config.TILE_SIZE[1], config.TILE_SIZE[0]))
@@ -95,13 +91,11 @@ while running:
                     board_can_change = True
                     moving_piece_start_position = ()
                     promotion_move = str(move)
-                    current_player = config.PLAYER_COLOR
                 else:
-                    current_player = config.PLAYER_COLOR
                     board_can_change = False
                     draw_piece(board, screen)
 
-            if not board_can_change and board.as_list()[selected_tile.row][selected_tile.col] != '.' and current_player == config.PLAYER_COLOR:
+            if not board_can_change and board.as_list()[selected_tile.row][selected_tile.col] != '.' and board.turn != (chess.WHITE if config.COMPUTER_COLOR == 'white' else chess.BLACK):
                 circles = []
                 for move in board.legal_moves:
                     if str(move)[:2] == str(selected_tile):
@@ -111,7 +105,6 @@ while running:
                 moving_piece_start_position = selected_tile
                 board_can_change = True if circles else False
                 promotion_move = None
-                current_player = config.PLAYER_COLOR
                 
 
         # check if the game ended
