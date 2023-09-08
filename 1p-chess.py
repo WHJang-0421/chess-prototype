@@ -4,7 +4,7 @@ import chess
 import config
 from Board import Board
 from Positions import TilePosition, PointPosition
-from models.AlphaBeta import AlphaBeta
+from models.AlphaBeta import AlphaBetaWithOpening
 
 pygame.init()
 pygame.display.set_caption('Chess')
@@ -44,7 +44,7 @@ def draw_piece(board, screen, circles=None):
 draw_piece(board, screen)
 
 ##### game logic
-computer_agent = AlphaBeta(4)
+computer_agent = AlphaBetaWithOpening(3)
 current_player = 'white'
 running = True
 board_can_change = False

@@ -59,3 +59,15 @@ class AlphaBeta(Player):
                 self.alpha = min(node.evaluation, self.alpha)
 
         return
+    
+class AlphaBetaWithOpening(Player):
+    def __init__(self, depth):
+        self.alphabeta = AlphaBeta(depth)
+
+    def next_move(self, board: Board):
+        with chess.polyglot.open_reader("data/Titans.bin") as reader:
+            entry = reader.get(board)
+            if entry is None:
+                return self.alphabeta.next_move(board)
+            else:
+                return entry.move
