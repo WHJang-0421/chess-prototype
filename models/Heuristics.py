@@ -26,10 +26,6 @@ def score(board: Board, color):
             return 100
         else:
             return -100
-        
-        
-
-
     result = 0
     for row in board.as_list():
         for c in row:
